@@ -19,7 +19,6 @@ meses_disponiveis = list(reversed(consulta_tabela_referencia()['mes']))
 meses_para_consultar = meses_disponiveis[:meses_disponiveis.index(ultimo_mes) - 1]
 #Iterando em todos os meses disponiveis
 for mes in meses_para_consultar:
-    print(mes)
     lista_marcas = consulta_tabela_marcas(mes=mes, tipo_veiculo='carro')
     #Iterando em todas as marcas do respectivo mes
     if ultima_marca in lista_marcas['marca'].values:
@@ -47,22 +46,25 @@ for mes in meses_para_consultar:
                     ano_modelo = df_final.loc[df_final['Modelo'] == modelo, 'AnoModelo'].iloc[0]
                 else:
                     ano_modelo = int(str(mes).split('/')[1])-1
-                print(f'mes: {mes}\nmarca: {marca}\nmodelo: {modelo}\nano modelo: {ano_modelo}')
-                preco = ConsultaFipe(
-                    mes=str(mes),
-                    tipo_veiculo='carro',
-                    marca=str(marca),
-                    modelo=str(modelo),
-                    ano_modelo=ano_modelo
-                ).preco()
+                try:
+                    preco = ConsultaFipe(
+                        mes=str(mes),
+                        tipo_veiculo='carro',
+                        marca=str(marca),
+                        modelo=str(modelo),
+                        ano_modelo=ano_modelo
+                    ).preco()
+
+                    if not ('erro' in preco.columns):
+                        print(preco)
+                        lista_dfs_precos.append(preco)
+
+                    else:
+                        print(f'Erro!\nmes: {mes}\nmarca: {marca}\nmodelo: {modelo}\nano modelo: {ano_modelo}\nnão encontrado!')
+
+                except:
+                    continue
                 
-                if not ('erro' in preco.columns):
-                    print(preco)
-                    lista_dfs_precos.append(preco)
-
-                else:
-                    print("Erro! Modelo não encontrado!")
-
             # Adicionando a primeira palavra vista ao conjunto
             df_final = pd.concat(lista_dfs_precos)
             df_final.to_excel("Dados Tabela Fipe.xlsx", index=False)
