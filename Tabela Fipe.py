@@ -5,6 +5,7 @@ from pyfipe.tabelas import consulta_tabela_referencia, consulta_tabela_marcas, c
 
 def main():
     print("Iniciando...")
+    #Extraindo dados da tabela
     df_final = pd.read_excel("Dados Tabela Fipe.xlsx")
     ultima_linha = df_final.iloc[-1]
 
@@ -19,7 +20,7 @@ def main():
     #Iterando em todos os meses disponiveis
     for mes in meses_para_consultar:
         lista_marcas = consulta_tabela_marcas(mes=str(mes), tipo_veiculo='carro')
-        #Iterando em todas as marcas do respectivo mes
+        #Verificando se a ultima marca está na lista extraida. Evita trazer marcas repetidas do ultimo mes
         if ultima_marca in lista_marcas['marca'].values and ultimo_mes == mes:
             indice_ultima_marca = list(lista_marcas['marca']).index(ultima_marca)
             marcas_para_consultar = lista_marcas['marca'].iloc[indice_ultima_marca:]
@@ -31,6 +32,7 @@ def main():
             # Lista para armazenar todos os DataFrames de preços
             lista_dfs_precos = []
 
+            #Extraindo modelos de carro da marca atual
             codigo_marca = lista_marcas.loc[lista_marcas['marca'] == marca, 'codigo_marca'].iloc[0]
             modelos_marca = consulta_tabela_modelos(mes=str(mes), tipo_veiculo='carro', codigo_marca=codigo_marca)
                 
@@ -50,11 +52,13 @@ def main():
                 #Verificando se o modelo já foi extraido em outros meses para pegar seu mes, senão é o mes atual
                 if modelo in df_final['Modelo'].values:
                     ano_modelo = df_final.loc[df_final['Modelo'] == modelo, 'AnoModelo'].iloc[0]
+                #Verificando se o modelo atual está no ultimo mes, senão, significa que é um modelo novo que apareceu no mes atual
                 elif modelo not in consulta_tabela_modelos(mes=meses_disponiveis[meses_disponiveis.index(ultimo_mes):][0], tipo_veiculo='carro', codigo_marca=codigo_marca)['modelo']:
                     ano_modelo = int(str(mes).split('/')[1])
                 else:
                     continue
                 
+                #Consultando preco do modelo
                 preco = ConsultaFipe(
                     mes=str(mes),
                     tipo_veiculo='carro',
@@ -63,6 +67,7 @@ def main():
                     ano_modelo=ano_modelo
                 ).preco()
 
+                #Caso não encontre o modelo retornara um df com erro na coluna
                 if not ('erro' in preco.columns):
                     print(preco)
                     lista_dfs_precos.append(preco)
@@ -74,8 +79,10 @@ def main():
                 df_final = pd.concat([df_final, novos_dados])
                 df_final.to_excel("Dados Tabela Fipe.xlsx", index=False)
                 
+        #Atualizando ultimo mes
         ultimo_mes = ultimo_mes
 
+#Laço para evitar quebra por falha na conexão com o site. Pode-se interromper o Script com CTRL + C
 while True:
     try:
         main()
