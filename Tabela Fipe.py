@@ -57,27 +57,30 @@ def main():
                     ano_modelo = int(str(mes).split('/')[1])
                 else:
                     continue
-                
-                #Consultando preco do modelo
-                preco = ConsultaFipe(
-                    mes=str(mes),
-                    tipo_veiculo='carro',
-                    marca=str(marca),
-                    modelo=str(modelo),
-                    ano_modelo=ano_modelo
-                ).preco()
+                try:
+                    #Consultando preco do modelo
+                    preco = ConsultaFipe(
+                        mes=str(mes),
+                        tipo_veiculo='carro',
+                        marca=str(marca),
+                        modelo=str(modelo),
+                        ano_modelo=ano_modelo
+                    ).preco()
+                except:
+                    continue
 
                 #Caso não encontre o modelo retornara um df com erro na coluna
                 if not ('erro' in preco.columns):
-                    print(preco)
+                    print(preco[['Valor', 'Marca', 'Modelo', 'AnoModelo', 'MesReferencia']])
                     lista_dfs_precos.append(preco)
+                    # Concatenando os dados e salvando os novos
                     novos_dados = pd.concat(lista_dfs_precos)
                 else:
                     continue
-                
-                # Concatenando os dados e salvando os novos
-                df_final = pd.concat([df_final, novos_dados])
-                df_final.to_excel("Dados Tabela Fipe.xlsx", index=False)
+            
+            #Remove os duplicados desconsiderando DataConsulta
+            df_final = pd.concat([df_final, novos_dados], ignore_index=True).drop_duplicates(subset=df_final.columns.difference(['DataConsulta']))
+            df_final.to_excel("Dados Tabela Fipe.xlsx", index=False)
                 
         #Atualizando ultimo mes
         ultimo_mes = ultimo_mes
