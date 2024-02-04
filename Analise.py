@@ -1,8 +1,27 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Carregar os dados do arquivo Excel
+# Função para converter mês por extenso para número do mês
+def mes_para_numero(mes_extenso):
+    meses = {
+        'janeiro': 1, 'fevereiro': 2, 'março': 3, 'abril': 4, 'maio': 5, 'junho': 6,
+        'julho': 7, 'agosto': 8, 'setembro': 9, 'outubro': 10, 'novembro': 11, 'dezembro': 12
+    }
+    mes, ano = mes_extenso.lower().split(" de ")
+    return pd.Timestamp(year=int(ano), month=meses[mes], day=1)
+
+# Carregar dados
+salario_minimo = pd.read_excel('Salario Minimo.xlsx')
+salario_minimo['Data'] = pd.to_datetime(salario_minimo['Data'], format='%d/%m/%Y')
 data = pd.read_excel('Dados Tabela Fipe.xlsx')
+
+# Converter a coluna 'MesReferencia' para o formato de data
+data['MesReferencia'] = data['MesReferencia'].apply(mes_para_numero)
+
+# Mesclar as duas tabelas com base na correspondência de mês e ano
+data = pd.merge(data, salario_minimo, left_on=data['MesReferencia'].dt.to_period('M'), right_on=salario_minimo['Data'].dt.to_period('M'), how='left')
+
+# Formatar valor do carro
 data['Valor'] = data['Valor'].apply(lambda x: (int(str(x).split("R$ ")[1].replace('.','').split(',')[0])))
 
 # Agrupar por marca
@@ -11,21 +30,21 @@ grouped_data = data.groupby('Marca')
 # Plotar o gráfico
 plt.figure(figsize=(14, 8))  # Definir o tamanho da figura
 
-# Iterar sobre cada grupo (marca)
 for marca, grupo in grouped_data:
     # Iterar sobre cada modelo dentro do grupo
     for modelo in grupo['Modelo'].unique():
         modelo_data = grupo[grupo['Modelo'] == modelo]
         # diferença de valores dos preços por modelo
         diff_values = modelo_data['Valor'].diff().dropna()
-        plt.plot(modelo_data['MesReferencia'].iloc[1:], diff_values, label=modelo + ' - ' + marca)
+        # Calcular a correlação entre o salário mínimo e o valor dos carros
+        correlacao = modelo_data['Salario'].corr(modelo_data['Valor'])
 
-    # Adicionar rótulos aos eixos e título ao gráfico
-    plt.xlabel('Mês de Referência')
-    plt.ylabel('Valor')
-    plt.title('Valores por Mês de Referência para cada Modelo e Marca')
-    plt.xticks(rotation=45)  # Rotacionar os rótulos do eixo X para facilitar a leitura
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Adicionar legenda fora do gráfico
-    plt.grid(True)  # Adicionar grade para melhor visualização
-    plt.tight_layout()  # Ajustar layout para melhor visualização dos elementos
-    plt.show()
+        # Plotar o gráfico de dispersão por modelo
+        plt.scatter(data['Salario'], data['Valor'], alpha=0.5)
+        plt.title(f'Correlação entre Salário Mínimo e Valor do Modelo: {modelo}')
+        plt.xlabel('Salário Mínimo')
+        plt.ylabel('Valor dos Carros')
+        plt.grid(True)
+        plt.text(data['Salario'].min(), data['Valor'].max(), f'Correlação: {correlacao:.2f}', fontsize=12, ha='right')
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Adicionar legenda fora do gráfico
+        plt.show()
