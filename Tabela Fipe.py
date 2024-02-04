@@ -53,6 +53,8 @@ def main():
                 if modelo in df_final['Modelo'].values:
                     ano_modelo = df_final.loc[df_final['Modelo'] == modelo, 'AnoModelo'].iloc[0]
                 #Verificando se o modelo atual está no ultimo mes, senão, significa que é um modelo novo que apareceu no mes atual
+                elif marca not in consulta_tabela_marcas(mes=meses_disponiveis[meses_disponiveis.index(ultimo_mes):][0], tipo_veiculo='carro'):
+                    ano_modelo = int(str(mes).split('/')[1])
                 elif modelo not in consulta_tabela_modelos(mes=meses_disponiveis[meses_disponiveis.index(ultimo_mes):][0], tipo_veiculo='carro', codigo_marca=codigo_marca)['modelo']:
                     ano_modelo = int(str(mes).split('/')[1])
                 else:
@@ -86,9 +88,9 @@ def main():
         ultimo_mes = ultimo_mes
 
 #Laço para evitar quebra por falha na conexão com o site. Pode-se interromper o Script com CTRL + C
-while True:
-    try:
-        main()
-    except Exception as e:
-        print(f"Ocorreu um erro: {e}")
-        continue
+# while True:
+#     try:
+main()
+    # except Exception as e:
+    #     print(f"Ocorreu um erro: {e}")
+    #     continue
