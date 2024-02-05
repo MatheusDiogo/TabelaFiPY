@@ -38,10 +38,21 @@ for marca, grupo in grouped_data:
         diff_values = modelo_data['Valor'].diff().dropna()
         # Calcular a correlação entre o salário mínimo e o valor dos carros
         correlacao = modelo_data['Salario'].corr(modelo_data['Valor'])
-
-        # Plotar o gráfico de dispersão por modelo
+        
+        # Plotando 2 gráficos por modelo
+        plt.subplot(1, 2, 1)
+        # Histograma da diferença dos valores
+        modelo_data['Valor'].hist(bins=50, alpha=0.5, label=modelo)
+        plt.title(f'Histograma do Valor dos Carros\nModelo: {modelo}')
+        plt.xlabel('Valor dos Carros')
+        plt.ylabel('Frequência')
+        plt.grid(True)
+        plt.legend()
+        
+        # Plotar o gráfico de dispersão
+        plt.subplot(1, 2, 2)
         plt.scatter(data['Salario'], data['Valor'], alpha=0.5)
-        plt.title(f'Correlação entre Salário Mínimo e Valor do Modelo: {modelo}')
+        plt.title(f'Correlação entre Salário Mínimo e Valor')
         plt.xlabel('Salário Mínimo')
         plt.ylabel('Valor dos Carros')
         plt.grid(True)

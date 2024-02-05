@@ -88,9 +88,9 @@ def main():
         ultimo_mes = ultimo_mes
 
 #Laço para evitar quebra por falha na conexão com o site. Pode-se interromper o Script com CTRL + C
-# while True:
-#     try:
-main()
-    # except Exception as e:
-    #     print(f"Ocorreu um erro: {e}")
-    #     continue
+while True:
+    try:
+        main()
+    except Exception as e:
+        print(f"Ocorreu um erro: {e}")
+        continue
