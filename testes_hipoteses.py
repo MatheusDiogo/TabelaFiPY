@@ -42,7 +42,11 @@ plt.ylabel('Diferença de Valor')
 plt.grid(True)
 plt.show()
 
-# Filtrar outliers (considerando valores além de 3 desvios padrão da média como outliers)
+stat_test, p_valor = normaltest(data.Diff_Valor)
+print(f'Teste para diferença de valor: {stat_test}\n')
+print(f'P Valor: {p_valor}')
+
+# Filtrar outliers (considerando valores além de 2 desvios padrão da média como outliers)
 mean_diff = data['Diff_Valor'].mean()
 std_diff = data['Diff_Valor'].std()
 data_filtrado = data[(data['Diff_Valor'] >= mean_diff - 2*std_diff) & (data['Diff_Valor'] <= mean_diff + 2*std_diff)]
@@ -66,6 +70,6 @@ plt.ylabel('Diferença de Valor')
 plt.grid(True)
 plt.show()
 
-stat_test, p_valor = normaltest(data_filtrado.Diff_Valor)
-print(stat_test)
-print(p_valor)
+stat_test_diff, p_valor_diff = normaltest(data_filtrado.Diff_Valor)
+print(f'Teste para diferença de valor: {stat_test_diff}\n')
+print(f'P Valor: {p_valor_diff}')
