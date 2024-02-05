@@ -28,7 +28,7 @@ data['Valor'] = data['Valor'].apply(lambda x: (int(str(x).split("R$ ")[1].replac
 grouped_data = data.groupby('Marca')
 
 # Plotar o gráfico
-plt.figure(figsize=(14, 8))  # Definir o tamanho da figura
+plt.figure(figsize=(14, 8))
 
 for marca, grupo in grouped_data:
     # Iterar sobre cada modelo dentro do grupo
