@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.stats import normaltest
 
 # Função para converter mês por extenso para número do mês
 def mes_para_numero(mes_extenso):
@@ -44,7 +45,7 @@ plt.show()
 # Filtrar outliers (considerando valores além de 3 desvios padrão da média como outliers)
 mean_diff = data['Diff_Valor'].mean()
 std_diff = data['Diff_Valor'].std()
-data_filtrado = data[(data['Diff_Valor'] >= mean_diff - 3*std_diff) & (data['Diff_Valor'] <= mean_diff + 3*std_diff)]
+data_filtrado = data[(data['Diff_Valor'] >= mean_diff - 2*std_diff) & (data['Diff_Valor'] <= mean_diff + 2*std_diff)]
 
 # Plotar o gráfico com os outliers removidos
 plt.figure(figsize=(12, 6))
@@ -64,3 +65,7 @@ plt.title('Boxplot das Diferenças de Valores dos Carros')
 plt.ylabel('Diferença de Valor')
 plt.grid(True)
 plt.show()
+
+stat_test, p_valor = normaltest(data_filtrado.Diff_Valor)
+print(stat_test)
+print(p_valor)
