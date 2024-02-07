@@ -24,7 +24,7 @@ data['Valor'] = data['Valor'].apply(lambda x: (int(str(x).split("R$ ")[1].replac
 data['Diff_Valor'] = data.groupby(['Marca', 'Modelo'])['Valor'].diff()
 
 # Plotar o gráfico
-plt.figure(figsize=(12, 6))
+plt.figure(figsize=(14, 8))
 
 # Plotar o histograma das diferenças de valores
 plt.subplot(1, 2, 1)
@@ -42,17 +42,17 @@ plt.ylabel('Diferença de Valor')
 plt.grid(True)
 plt.show()
 
-stat_test, p_valor = normaltest(data.Diff_Valor)
-print(f'Teste para diferença de valor: {stat_test}\n')
-print(f'P Valor: {p_valor}')
+stat_test_diff, p_valor_diff = normaltest(data.Diff_Valor)
+print(f'Teste para diferença de valor sem outliers: {stat_test_diff}\n')
+print(f'P Valor: {p_valor_diff}')
 
 # Filtrar outliers (considerando valores além de 2 desvios padrão da média como outliers)
 mean_diff = data['Diff_Valor'].mean()
 std_diff = data['Diff_Valor'].std()
 data_filtrado = data[(data['Diff_Valor'] >= mean_diff - 2*std_diff) & (data['Diff_Valor'] <= mean_diff + 2*std_diff)]
 
-# Plotar o gráfico com os outliers removidos
-plt.figure(figsize=(12, 6))
+# Plotar o gráfico
+plt.figure(figsize=(14, 8))
 
 # Plotar o histograma das diferenças de valores
 plt.subplot(1, 2, 1)
@@ -71,5 +71,5 @@ plt.grid(True)
 plt.show()
 
 stat_test_diff, p_valor_diff = normaltest(data_filtrado.Diff_Valor)
-print(f'Teste para diferença de valor: {stat_test_diff}\n')
+print(f'Teste para diferença de valor sem outliers: {stat_test_diff}\n')
 print(f'P Valor: {p_valor_diff}')

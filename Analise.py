@@ -35,22 +35,22 @@ for marca, grupo in grouped_data:
     for modelo in grupo['Modelo'].unique():
         modelo_data = grupo[grupo['Modelo'] == modelo]
         # diferença de valores dos preços por modelo
-        diff_values = modelo_data['Valor'].diff().dropna()
+        modelo_data['Diff_Valor'] = modelo_data['Valor'].diff().dropna()
         # Calcular a correlação entre o salário mínimo e o valor dos carros
         correlacao = modelo_data['Salario'].corr(modelo_data['Valor'])
         
         # Plotando 2 gráficos por modelo
-        plt.subplot(1, 2, 1)
+        plt.subplot(1, 3, 1)
         # Histograma da diferença dos valores
-        modelo_data['Valor'].hist(bins=50, alpha=0.5, label=modelo)
-        plt.title(f'Histograma do Valor dos Carros\nModelo: {modelo}')
+        modelo_data['Diff_Valor'].hist(bins=50, alpha=0.5, label=modelo)
+        plt.title(f'Histograma da Diferença entre Valores\nModelo: {modelo}')
         plt.xlabel('Valor dos Carros')
         plt.ylabel('Frequência')
         plt.grid(True)
         plt.legend()
         
         # Plotar o gráfico de dispersão
-        plt.subplot(1, 2, 2)
+        plt.subplot(1, 3, 2)
         plt.scatter(data['Salario'], data['Valor'], alpha=0.5)
         plt.title(f'Correlação entre Salário Mínimo e Valor')
         plt.xlabel('Salário Mínimo')
@@ -58,4 +58,13 @@ for marca, grupo in grouped_data:
         plt.grid(True)
         plt.text(data['Salario'].min(), data['Valor'].max(), f'Correlação: {correlacao:.2f}', fontsize=12, ha='right')
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')  # Adicionar legenda fora do gráfico
+
+        # Histograma dos valores dos carros
+        plt.subplot(1, 3, 3)
+        modelo_data['Valor'].hist(bins=50, alpha=0.5, label=modelo)
+        plt.title(f'Histograma do Valor dos Carros\nModelo: {modelo}')
+        plt.xlabel('Valor dos Carros')
+        plt.ylabel('Frequência')
+        plt.grid(True)
+        plt.legend()
         plt.show()
