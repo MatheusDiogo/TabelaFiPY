@@ -21,7 +21,8 @@ data['MesReferencia'] = data['MesReferencia'].apply(mes_para_numero)
 data['Valor'] = data['Valor'].apply(lambda x: (int(str(x).split("R$ ")[1].replace('.','').split(',')[0])))
 
 # Calcular a diferença de valores dos preços dos carros
-data['Diff_Valor'] = data.groupby(['Marca', 'Modelo'])['Valor'].diff()
+data['Diff_Valor'] = data.groupby(['Marca', 'Modelo'])['Valor'].diff().dropna()
+data = data.dropna()
 
 # Plotar o gráfico
 plt.figure(figsize=(14, 8))
