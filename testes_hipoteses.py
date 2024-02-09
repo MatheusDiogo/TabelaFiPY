@@ -24,29 +24,6 @@ data['Valor'] = data['Valor'].apply(lambda x: (int(str(x).split("R$ ")[1].replac
 data['Diff_Valor'] = data.groupby(['Marca', 'Modelo'])['Valor'].diff().dropna()
 data = data.dropna()
 
-# Plotar o gráfico
-plt.figure(figsize=(14, 8))
-
-# Plotar o histograma das diferenças de valores
-plt.subplot(1, 2, 1)
-data['Diff_Valor'].hist(bins=50)
-plt.title('Histograma das Diferenças de Valores dos Carros')
-plt.xlabel('Diferença de Valor')
-plt.ylabel('Frequência')
-plt.grid(True)
-
-# Plotar o boxplot das diferenças de valores
-plt.subplot(1, 2, 2)
-data.boxplot(column='Diff_Valor')
-plt.title('Boxplot das Diferenças de Valores dos Carros')
-plt.ylabel('Diferença de Valor')
-plt.grid(True)
-plt.show()
-
-stat_test_diff, p_valor_diff = normaltest(data.Diff_Valor)
-print(f'Teste para diferença de valor sem outliers: {stat_test_diff}\n')
-print(f'P Valor: {p_valor_diff}')
-
 # Filtrar outliers (considerando valores além de 2 desvios padrão da média como outliers)
 mean_diff = data['Diff_Valor'].mean()
 std_diff = data['Diff_Valor'].std()
@@ -65,7 +42,7 @@ plt.grid(True)
 
 # Plotar o boxplot das diferenças de valores
 plt.subplot(1, 2, 2)
-data_filtrado.boxplot(column='Diff_Valor', showfliers=False)
+data_filtrado.boxplot(column='Diff_Valor')
 plt.title('Boxplot das Diferenças de Valores dos Carros')
 plt.ylabel('Diferença de Valor')
 plt.grid(True)
@@ -73,4 +50,31 @@ plt.show()
 
 stat_test_diff, p_valor_diff = normaltest(data_filtrado.Diff_Valor)
 print(f'Teste para diferença de valor sem outliers: {stat_test_diff}\n')
+print(f'P Valor: {p_valor_diff}')
+
+# Suavizar os dados usando uma janela móvel
+data_filtrado['Diff_Valor_Suavizado'] = data_filtrado['Diff_Valor'].rolling(window=12, min_periods=1).mean()
+
+# Plotar o gráfico
+plt.figure(figsize=(14, 8))
+
+# Plotar o histograma das diferenças de valores suavizados
+plt.subplot(1, 2, 1)
+data_filtrado['Diff_Valor_Suavizado'].hist(bins=50)
+plt.title('Histograma das Diferenças de Valores dos Carros (Suavizado)')
+plt.xlabel('Diferença de Valor')
+plt.ylabel('Frequência')
+plt.grid(True)
+
+# Plotar o boxplot das diferenças de valores suavizados
+plt.subplot(1, 2, 2)
+data_filtrado.boxplot(column='Diff_Valor_Suavizado')
+plt.title('Boxplot das Diferenças de Valores dos Carros (Suavizado)')
+plt.ylabel('Diferença de Valor')
+plt.grid(True)
+plt.show()
+
+# Testar a normalidade novamente
+stat_test_diff, p_valor_diff = normaltest(data_filtrado['Diff_Valor_Suavizado'])
+print(f'Teste para diferença de valor suavizada sem outliers: {stat_test_diff}\n')
 print(f'P Valor: {p_valor_diff}')
