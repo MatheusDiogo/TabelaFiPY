@@ -32,10 +32,11 @@ def main():
     # Converter a lista de dicionários em DataFrame
     df_ultimos_dados = pd.DataFrame(ultimos_dados_modelos)
     
-    meses_disponiveis = list(reversed(consulta_tabela_referencia()['mes']))
-    
     for index, rows in df_ultimos_dados.iterrows():
         ultimo_mes_modelo = rows['MesReferencia'].replace(" de ", "/").strip()
+
+        meses_disponiveis = list(reversed(consulta_tabela_referencia()['mes']))
+
         # Encontrar o índice do último mês do modelo na lista de meses disponíveis
         indice_ultimo_mes = meses_disponiveis.index(ultimo_mes_modelo)
         
