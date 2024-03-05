@@ -21,7 +21,8 @@ def main():
     ultimos_dados_modelos = []
     
     lista_dfs_precos = []
-
+    print(len(modelos_sem_dados))
+    
     # Percorrer a lista de modelos sem dados
     for modelo in modelos_sem_dados:
         # Filtrar o DataFrame para obter os últimos dados do modelo atual
