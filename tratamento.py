@@ -20,7 +20,8 @@ salario_minimo['Data'] = pd.to_datetime(salario_minimo['Data'], format='%d/%m/%Y
     # Dados FIPE
 data = pd.read_excel('Dados Tabela Fipe.xlsx')
     # Inflação
-inflacao = pd.read_excel('Inflação.xlsx', skiprows=3, sheet_name='Tabela 2').iloc[:1, 1:]
+inflacao_abas = ['Tabela 1', 'Tabela 2', 'Tabela 3', 'Tabela 4', 'Tabela 5']
+dfs = []
     # Cotação Dolar
 df = pd.read_csv("USD_BRL Dados Históricos.csv", delimiter=",")
 
@@ -40,37 +41,32 @@ dolar_df = media_mensal_ponderada.reset_index()
 dolar_df['Data'] = dolar_df['Data'].apply(lambda x: pd.to_datetime(str(x)+'-01'))
 dolar_df.columns = ['Data', 'Media_Dolar']
 
-# Transformando data
-data_inflacao = inflacao.transpose().reset_index().rename(columns={'index': 'Data'}).rename(columns={0: 'Inflacao'})
-data_inflacao['Data'] = pd.to_datetime(data_inflacao['Data'].apply(mes_para_numero))
+# Transformando dados Inflacao
+for aba in inflacao_abas:
+    inflacao = pd.read_excel('Inflação.xlsx', skiprows=3, sheet_name=aba).iloc[:1, 1:]
+    data_inflacao = inflacao.transpose().reset_index().rename(columns={'index': 'Data'}).rename(columns={0: aba})
+    data_inflacao['Data'] = pd.to_datetime(data_inflacao['Data'].apply(mes_para_numero))
+    dfs.append(data_inflacao)
+
+# Mesclar os DataFrames das diferentes abas
+data_inflacao_merged = dfs[0]
+for df in dfs[1:]:
+    data_inflacao_merged = pd.merge(data_inflacao_merged, df, on='Data', how='outer')
+
+# Renomear as colunas
+data_inflacao_merged.columns = ['Data', 'Inflacao_Total', 'Inflacao_Mensal', 'Inflacao_Trimestral', 'Inflacao_Semestral', 'Inflacao_Anual']
 
 # Converter a coluna 'MesReferencia' para o formato de data
 data['MesReferencia'] = data['MesReferencia'].apply(mes_para_numero)
 
 # Mesclar com o DataFrame principal
 data = pd.merge(data, salario_minimo, left_on='MesReferencia', right_on='Data', how='left')
-data = pd.merge(data, data_inflacao, on='Data', how='left')
+data = pd.merge(data, data_inflacao_merged, on='Data', how='left')
 data = pd.merge(data, dolar_df, on='Data', how='left')
 data = data.drop(columns=['Data'])
 
 # Formatar valor do carro
 data['Valor'] = data['Valor'].apply(lambda x: (int(str(x).split("R$ ")[1].replace('.','').split(',')[0])))
-
-# Calcular a média dos valores por marca
-media_por_marca = data.groupby('Marca')['Valor'].mean().sort_values()
-
-# Criar um dicionário para mapear as marcas para suas classificações
-classificacao = {}
-ranking = 1
-for marca, media_valor in media_por_marca.items():
-    classificacao[marca] = ranking
-    ranking += 1
-
-# Adicionar uma nova coluna de classificação ao DataFrame
-data['Classificacao'] = data['Marca'].map(classificacao)
-
-# Exibir o DataFrame ordenado pela classificação
-data = data.sort_values(by='Classificacao')
 
 # Ordenar o DataFrame pela coluna 'Modelo' e 'MesReferencia'
 data_sorted = data.sort_values(by=['Modelo', 'MesReferencia'])
