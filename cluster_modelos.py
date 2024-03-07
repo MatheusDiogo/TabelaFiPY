@@ -9,9 +9,9 @@ dados = pd.read_excel('Dados_Tratados.xlsx')
 # Selecionar as características para o modelo
 caracteristicas = ['Valor', 'Classificacao_Marca', 'Classificacao_Modelo', 'Idade_modelo']
 
-# # Normalizar os dados
-# scaler = StandardScaler()
-# dados[caracteristicas] = scaler.fit_transform(dados[caracteristicas])
+# Normalizar os dados
+scaler = StandardScaler()
+dados[caracteristicas] = scaler.fit_transform(dados[caracteristicas])
 
 # Escolher o número de clusters
 n_clusters = 5
@@ -27,22 +27,23 @@ for cluster in range(n_clusters):
     print("\n")
 
 # Visualização dos clusters
-plt.figure(figsize=(10, 6))
+fig, axs = plt.subplots(1, 2, figsize=(16, 6))
+
 for cluster in range(n_clusters):
     dados_cluster = dados[dados['Cluster'] == cluster]
-    plt.scatter(dados_cluster['Idade_modelo'], dados_cluster['Valor'], label=f'Cluster {cluster}')
-plt.title('Valor vs Idade - Clusters de Modelos de Carro')
-plt.xlabel('Idade')
-plt.ylabel('Valor')
-plt.legend()
-plt.show()
+    axs[0].scatter(dados_cluster['Idade_modelo'], dados_cluster['Valor'], label=f'Cluster {cluster}')
+axs[0].set_title('Valor vs Idade - Clusters de Modelos de Carro')
+axs[0].set_xlabel('Idade')
+axs[0].set_ylabel('Valor')
+axs[0].legend()
 
 # Boxplot dos clusters
-plt.figure(figsize=(10, 6))
-plt.boxplot([dados[dados['Cluster'] == cluster]['Valor'] for cluster in range(n_clusters)], patch_artist=True)
-plt.title('Boxplot dos Clusters')
-plt.xlabel('Cluster')
-plt.ylabel('Valor')
-plt.xticks(range(1, n_clusters + 1), [f'Cluster {i}' for i in range(n_clusters)])
-plt.grid(True)
+axs[1].boxplot([dados[dados['Cluster'] == cluster]['Valor'] for cluster in range(n_clusters)], patch_artist=True)
+axs[1].set_title('Boxplot dos Clusters')
+axs[1].set_xlabel('Cluster')
+axs[1].set_ylabel('Valor')
+axs[1].set_xticks(range(1, n_clusters + 1), [f'Cluster {i}' for i in range(n_clusters)])
+axs[1].grid(True)
+
+plt.tight_layout()
 plt.show()
