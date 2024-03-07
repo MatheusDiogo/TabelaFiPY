@@ -68,8 +68,34 @@ data = data.drop(columns=['Data'])
 # Formatar valor do carro
 data['Valor'] = data['Valor'].apply(lambda x: (int(str(x).split("R$ ")[1].replace('.','').split(',')[0])))
 
+# Calcular a média dos valores por marca
+media_por_marca = data.groupby('Marca')['Valor'].mean().sort_values()
+
+# Criar um dicionário para mapear as marcas para suas classificações
+classificacao_marca = {}
+ranking = 1
+for marca, media_valor in media_por_marca.items():
+    classificacao_marca[marca] = ranking
+    ranking += 1
+
+# Adicionar uma nova coluna de classificação ao DataFrame
+data['Classificacao_Marca'] = data['Marca'].map(classificacao_marca)
+
+# Calcular a média dos valores por modelo
+media_por_modelo = data.groupby('Modelo')['Valor'].mean().sort_values()
+
+# Criar um dicionário para mapear os modelos para suas classificações
+classificacao_modelo = {}
+ranking = 1
+for modelo, media_valor in media_por_marca.items():
+    classificacao_modelo[modelo] = ranking
+    ranking += 1
+
+# Adicionar uma nova coluna de classificação ao DataFrame
+data['Classificacao_Modelo'] = data['Marca'].map(classificacao_modelo)
+
 # Ordenar o DataFrame pela coluna 'Modelo' e 'MesReferencia'
-data_sorted = data.sort_values(by=['Modelo', 'MesReferencia'])
+data_sorted = data.sort_values(by=['MesReferencia', 'Marca'])
 
 # Calcular a diferença entre 'MesReferencia' e a primeira ocorrência de cada modelo para obter a idade do modelo em meses
 data['Idade_modelo'] = data_sorted.groupby('Modelo')['MesReferencia'].transform(lambda x: (x - x.iloc[0]).dt.days // 30)
