@@ -9,9 +9,9 @@ dados = pd.read_excel('Dados_Tratados.xlsx')
 # Selecionar as características para o modelo
 caracteristicas = ['Valor', 'Classificacao_Marca', 'Classificacao_Modelo', 'Idade_modelo']
 
-# Normalizar os dados
-scaler = StandardScaler()
-dados[caracteristicas] = scaler.fit_transform(dados[caracteristicas])
+# # Normalizar os dados
+# scaler = StandardScaler()
+# dados[caracteristicas] = scaler.fit_transform(dados[caracteristicas])
 
 # Escolher o número de clusters
 n_clusters = 5
@@ -47,3 +47,5 @@ axs[1].grid(True)
 
 plt.tight_layout()
 plt.show()
+
+dados.to_excel('Dados_Clusterizados.xlsx', index = False)
