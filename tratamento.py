@@ -56,6 +56,8 @@ for df in dfs[1:]:
 # Renomear as colunas
 data_inflacao_merged.columns = ['Data', 'Inflacao_Total', 'Inflacao_Mensal', 'Inflacao_Trimestral', 'Inflacao_Semestral', 'Inflacao_Anual']
 
+data_inflacao_merged['Inflacao_Acumulada'] = data_inflacao_merged['Inflacao_Mensal'].cumsum()
+
 # Converter a coluna 'MesReferencia' para o formato de data
 data['MesReferencia'] = data['MesReferencia'].apply(mes_para_numero)
 
