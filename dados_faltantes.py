@@ -8,8 +8,8 @@ def main():
     # Extraindo dados da tabela
     df_final = pd.read_excel("Dados Tabela Fipe.xlsx")
     
-    # Obter o último mês na tabela
-    ultimo_mes = df_final['MesReferencia'].iloc[-1]
+    # Obter o penúltimo mês na tabela
+    ultimo_mes = df_final['MesReferencia'].iloc[-2]
     print(ultimo_mes)
     # Verificar se há modelos sem dados no último mês
     modelos_sem_dados = []
