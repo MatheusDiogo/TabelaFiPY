@@ -12,7 +12,7 @@ dados = dados.dropna()
 dados['MesReferencia'] = pd.to_datetime(dados['MesReferencia'])
 
 # Agrupar os dados por Marca e Modelo e criar uma série temporal para cada grupo
-dados_agrupados = dados.groupby(['Marca', 'Modelo'])
+dados_agrupados = dados.groupby('Modelo')
 
 series_temporais = []
 for grupo, dados_grupo in dados_agrupados:
