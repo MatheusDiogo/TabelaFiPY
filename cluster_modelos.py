@@ -14,8 +14,17 @@ dados['MesReferencia'] = pd.to_datetime(dados['MesReferencia'])
 # Agrupar os dados por Marca e Modelo e criar uma série temporal para cada grupo
 dados_agrupados = dados.groupby('Modelo')
 
-series_temporais = []
-for grupo, dados_grupo in dados_agrupados:
+# Calcular a média do valor para cada modelo
+media_por_modelo = dados_agrupados['Valor'].mean()
+
+# Selecionar os modelos com média inferior a 70000
+modelos_menos_de_70000 = media_por_modelo[media_por_modelo < 60000].index
+
+# Filtrar os dados originais para incluir apenas os modelos selecionados
+dados_selecionados = dados[dados['Modelo'].isin(modelos_menos_de_70000)]
+
+series_temporais = {}
+for grupo, dados_grupo in dados_selecionados.groupby('Modelo'):
     # Ordenar os dados pelo MesReferencia
     dados_grupo = dados_grupo.sort_values('MesReferencia')
     
@@ -29,9 +38,9 @@ for grupo, dados_grupo in dados_agrupados:
     serie_temporal = pd.Series(data=valores, index=indices_temporais)
     
     # Adicionar a série temporal à lista de séries temporais
-    series_temporais.append(serie_temporal)
+    series_temporais[grupo] = serie_temporal
 
-dados_series_temporais = to_time_series_dataset(series_temporais)
+dados_series_temporais = to_time_series_dataset(list(series_temporais.values()))
 
 # Definir o número de clusters desejado
 num_clusters = 9
@@ -42,70 +51,45 @@ modelo_kmeans = TimeSeriesKMeans(n_clusters=num_clusters, metric="dtw", verbose=
 # Ajustar o modelo aos dados
 modelo_kmeans.fit(dados_series_temporais)
 print('Treinamento Finalizado')
+
 # Prever os clusters para as séries temporais
 rotulos_clusters = modelo_kmeans.predict(dados_series_temporais)
 
 # Configurações de plotagem
 plt.figure(figsize=(15, 10))
 
-# Plotar cada série temporal com cores diferentes para cada cluster
+# Plotar a série temporal para cada cluster
 for yi in range(num_clusters):
     plt.subplot(3, 3, yi + 1)
     for xx in dados_series_temporais[rotulos_clusters == yi]:
         plt.plot(xx.ravel(), "k-", alpha=.2)
     plt.plot(modelo_kmeans.cluster_centers_[yi].ravel(), "r-")
-    plt.text(0.55, 0.85,'Cluster %d' % (yi + 1),
+    plt.text(0.55, 0.85,'Cluster %d' % (yi),
              transform=plt.gca().transAxes)
     if yi == 1:
         plt.title("DBA $k$-means")
 
 plt.tight_layout()
 plt.show()
-# # Selecionar as características para o modelo
-# caracteristicas = ['Classificacao_Modelo', 'Valor', 'AnoModelo','Idade_modelo', 'Inflacao_Total', 'Inflacao_Mensal', 'Inflacao_Trimestral', 'Inflacao_Semestral', 'Inflacao_Anual']
 
-# # Normalizar os dados
-# scaler = StandardScaler()
-# dados[caracteristicas] = scaler.fit_transform(dados[caracteristicas])
+# Mostrar os modelos alocados em cada grupo
+for cluster in range(num_clusters):
+    print(f"Grupo {cluster}:")
+    for modelo, serie_temporal in series_temporais.items():
+        if rotulos_clusters[list(series_temporais.keys()).index(modelo)] == cluster:
+            print(modelo)
+    print("\n")
 
-# # Converter os dados para séries temporais
-# dados_series_temporais = to_time_series_dataset(dados[caracteristicas])
+# Criar um dicionário para mapear os modelos aos clusters
+modelo_cluster_map = {}
+for modelo, serie_temporal in series_temporais.items():
+    modelo_cluster_map[modelo] = rotulos_clusters[list(series_temporais.keys()).index(modelo)]
 
-# # Escolher o número de clusters
-# n_clusters = 5
+# Adicionar a coluna 'Cluster' ao DataFrame
+dados_selecionados['Cluster'] = dados_selecionados['Modelo'].map(modelo_cluster_map)
 
-# # Aplicar o algoritmo de clustering
-# kmeans = TimeSeriesKMeans(n_clusters=n_clusters, metric='euclidean', random_state=42)
-# dados['Cluster'] = kmeans.fit_predict(dados_series_temporais)
+# Verificar o DataFrame modificado
+print(dados_selecionados.head())
 
-# # Mostrar as marcas alocadas em cada grupo
-# for cluster in range(n_clusters):
-#     print(f"Grupo {cluster}:")
-#     print(dados[dados['Cluster'] == cluster]['Marca'].value_counts())
-#     print("\n")
-
-# # Visualização dos clusters
-# fig, axs = plt.subplots(1, 2, figsize=(16, 6))
-
-# for cluster in range(n_clusters):
-#     dados_cluster = dados[dados['Cluster'] == cluster]
-#     axs[0].scatter(dados_cluster['Idade_modelo'], dados_cluster['Valor'], label=f'Cluster {cluster}')
-# axs[0].set_title('Valor vs Idade - Clusters de Modelos de Carro')
-# axs[0].set_xlabel('Idade')
-# axs[0].set_ylabel('Valor')
-# axs[0].legend()
-
-# # Boxplot dos clusters
-# axs[1].boxplot([dados[dados['Cluster'] == cluster]['Valor'] for cluster in range(n_clusters)], patch_artist=True)
-# axs[1].set_title('Boxplot dos Clusters')
-# axs[1].set_xlabel('Cluster')
-# axs[1].set_ylabel('Valor')
-# axs[1].set_xticks(range(1, n_clusters + 1), [f'Cluster {i}' for i in range(n_clusters)])
-# axs[1].grid(True)
-
-# plt.tight_layout()
-# plt.show()
-
-# dados[caracteristicas] = scaler.inverse_transform(dados[caracteristicas])
-
-# dados.to_excel('Dados_Clusterizados.xlsx', index = False)
+# Salvar o DataFrame modificado como um arquivo Excel
+dados_selecionados.to_excel('Dados_Clusterizados.xlsx', index=False)
